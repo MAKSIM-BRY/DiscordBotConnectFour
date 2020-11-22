@@ -15,14 +15,30 @@ const prefix = '!';
 client.on('message', message => {
   if (!message.content.startsWith(prefix) || message.author.bot) return;
   const args = message.content.slice(prefix.length).trim().split(' ');
-  console.log(args);
-  const command = args.shift().toLowerCase();
-  // console.log(command);
+  const command = args[0].toLowerCase();
 
   if (command === 'init') {
-    const authorId = message.author.id;
-    console.log(message.bot)
-    const connectFour = new ConnectFour(message);
+    let mentionnedId = args[1];
+    if (mentionnedId === undefined) {
+      const embed = new MessageEmbed()
+      .setTitle('Erreur')
+      .setColor(0xff0000)
+      .setDescription('Vous dever mentionner un joueur, pour débuter la partie.');
+      message.channel.send(embed);
+    return;
+    }
+
+    if (mentionnedId.startsWith('<@') && mentionnedId.endsWith('>')) {
+      mentionnedId = mentionnedId.slice(3, -1);
+    } else {
+      const embed = new MessageEmbed()
+      .setTitle('Erreur')
+      .setColor(0xff0000)
+      .setDescription('Vous dever mentionner un utilisateur.');
+      message.channel.send(embed);
+      return;
+    }
+    const connectFour = new ConnectFour(message, mentionnedId);
     client.on('messageReactionAdd', (messageReaction, user) => {
       connectFour.takeReacton(messageReaction, user);
     });
